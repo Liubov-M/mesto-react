@@ -12,5 +12,5 @@
 Проект портирован на React.
 
 ***
-[Ссылка на проект в Github]()
+[Ссылка на проект в Github](https://liubov-m.github.io/mesto-react/)
 
