@@ -9,8 +9,7 @@ function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false)
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false)
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false)
-  const [selectedCard, setSelectedCard] = useState({})
-  const [isImagePopup, setIsImagePopup] = useState(false)
+  const [selectedCard, setSelectedCard] = useState(null)
 
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(true)
@@ -25,12 +24,10 @@ function App() {
     setIsEditProfilePopupOpen(false)
     setIsEditAvatarPopupOpen(false)
     setIsAddPlacePopupOpen(false)
-    setSelectedCard({})
-    setIsImagePopup(false)
+    setSelectedCard(null)
   }
-  function handleCardClick(card) {
-    setSelectedCard(card)
-    setIsImagePopup(true)
+  function handleCardClick(props) {
+    setSelectedCard(props)
   }
 
   return (
@@ -50,6 +47,7 @@ function App() {
       <PopupWithForm
       name="#edit-profile"
       title="Редактировать профиль"
+      buttonText="Сохранить"
       isOpen={isEditProfilePopupOpen}
       onClose={closeAllPopups}
       >
@@ -80,6 +78,7 @@ function App() {
       <PopupWithForm
       name="#edit-cards"
       title="Новое место"
+      buttonText="Создать"
       isOpen={isAddPlacePopupOpen}
       onClose={closeAllPopups}
       >
@@ -108,6 +107,7 @@ function App() {
       <PopupWithForm
       name="#edit-avatar"
       title="Обновить аватар"
+      buttonText="Сохранить"
       isOpen={isEditAvatarPopupOpen}
       onClose={closeAllPopups}
       >
@@ -125,10 +125,10 @@ function App() {
       <PopupWithForm
       name="#delete-popup"
       title="Вы уверены?"
+      buttonText="Да"
       />
       <ImagePopup
       card={selectedCard}
-      isOpen={isImagePopup}
       onClose={closeAllPopups}
       />
     </div>

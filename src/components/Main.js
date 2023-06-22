@@ -9,19 +9,22 @@ export default function Main({onEditProfile, onAddPlace, onEditAvatar, onCardCli
   const [cards, setCards] = useState([])
 
   useEffect(() => {
-    api.getUserInfo().then((userData) => {
+    api.getUserInfo()
+    .then((userData) => {
       setUserName(userData.name)
       setUserDescription(userData.about)
       setUserAvatar(userData.avatar)
-    api.getCards().then((cardData) => {
-      cardData.forEach(data => data.userId = userData._id)
-      setCards(cardData.map(item => ({
-        id: item._id,
-        link: item.link,
-        name: item.name,
-      })))
+    api.getCards()
+    .then((cardData) => {
+      setCards(cardData)
     })
+    .catch((error) => {
+      console.log(`Ошибка, ${error}`)
+      })
     })
+    .catch((error) => {
+      console.log(`Ошибка, ${error}`)
+      })
   }, [])
 
   return (
@@ -42,7 +45,7 @@ export default function Main({onEditProfile, onAddPlace, onEditAvatar, onCardCli
         <ul className="elements">{
           cards.map(
             (data) => {
-              return (<Card key={data.id} card={data} onCardClick={onCardClick}/>)
+              return (<Card key={data._id} card={data} onCardClick={onCardClick}/>)
             }
           )}</ul>
       </section>
