@@ -26,23 +26,23 @@ class Api {
       })
       .then(this._getResponseData);
     }
-    setUserInfo(data) {
+    setUserInfo({ name, about }) {
       return fetch(`${this._baseUrl}/users/me`, {
         method: 'PATCH',
         headers: this._headers,
         body: JSON.stringify({
-          name: data.username,
-          about: data.job
+          name,
+          about
         })
       })
       .then(this._getResponseData);
     }
-    setUserAvatar(data) {
+    setUserAvatar(link) {
       return fetch(`${this._baseUrl}/users/me/avatar`, {
         method: 'PATCH',
         headers: this._headers,
         body: JSON.stringify({
-          avatar: data.avatar
+          avatar: link
         })
       })
       .then(this._getResponseData);
@@ -85,7 +85,19 @@ class Api {
       })
       .then(this._getResponseData);
     }
+    
+     changeLikeCardStatus(cardId, isLiked) {
+    return fetch(`${this._baseUrl}/cards/${cardId}/likes`,
+      {
+        method: isLiked ? "PUT" : "DELETE",
+        headers: {
+          authorization: this._authorization
+        }
+      })
+      .then(this._getResponseData)
+    }
   }
+  
   const api = new Api({
     baseUrl: 'https://mesto.nomoreparties.co/v1/cohort-66',
     headers: {
