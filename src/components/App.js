@@ -49,7 +49,7 @@ function App() {
   function handleCardDelete(card) {
     api.deleteCard(card._id)
       .then(() => {
-        setCards(cards.filter(item => item._id !== card._id));
+        setCards((state) => state.filter(item => item._id !== card._id));
       })
       .catch((error) => {
         console.log(`Ошибка при удалении карточки, ${error}`)
@@ -67,39 +67,33 @@ function App() {
   }
   function handleUpdateAvatar({ avatar }) {
     api.setUserAvatar(avatar)
-    .then((res) => {
-      setCurrentUser(res);
-      closeAllPopups();
-    })
-    .catch((error) => {
-      console.log(`Ошибка при изменении аватара, ${error}`)
-    })
+      .then((res) => {
+        setCurrentUser(res);
+        closeAllPopups();
+      })
+      .catch((error) => {
+        console.log(`Ошибка при изменении аватара, ${error}`)
+      })
   }
   function handleAddPlaceSubmit(cardData) {
     api.addCard(cardData)
-    .then((res) => {
-      setCards([res, ...cards]);
-      closeAllPopups();
-    })
-    .catch((error) => {
-      console.log(`Ошибка при добавлении карточки, ${error}`)
-    })
+      .then((res) => {
+        setCards([res, ...cards]);
+        closeAllPopups();
+      })
+      .catch((error) => {
+        console.log(`Ошибка при добавлении карточки, ${error}`)
+      })
   }
 
   useEffect(() => {
-    api.getUserInfo()
-    .then((userData) => {
-      setCurrentUser(userData)
-    api.getCards()
-    .then((cardData) => {
-      setCards(cardData)
-    })
-    .catch((error) => {
-      console.log(`Ошибка, ${error}`)
+    Promise.all([api.getUserInfo(), api.getCards()])
+      .then(([dataUser, dataCards]) => {
+        setCurrentUser(dataUser)
+        setCards(dataCards)
       })
-    })
-    .catch((error) => {
-      console.log(`Ошибка, ${error}`)
+      .catch((error) => {
+        console.log(`Ошибка, ${error}`)
       })
   }, [])
 

@@ -48,7 +48,7 @@ export default function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
             minLength={2}
             maxLength={40}
             required
-            value={name ? name : ''}
+            value={name ?? ''}
           />
           <span className="popup__input-error" id="firstname-error" />
           <input
@@ -61,7 +61,7 @@ export default function EditProfilePopup({ isOpen, onClose, onUpdateUser }) {
             minLength={2}
             maxLength={200}
             required
-            value={description ? description : ''}
+            value={description ?? ''}
           />
           <span className="popup__input-error" id="job-error" />
         </PopupWithForm>

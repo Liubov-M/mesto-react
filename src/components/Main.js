@@ -4,6 +4,16 @@ import Card from './Card.js'
 
 export default function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick, cards, onCardLike, onCardDelete }) {
   const currentUser = useContext(CurrentUserContext)
+  const cardsElements = cards.map(
+    (data) => {
+      return (<Card
+        key={data._id}
+        card={data}
+        onCardClick={onCardClick}
+        onCardLike={onCardLike}
+        onCardDelete={onCardDelete}/>)
+    }
+  )
 
   return (
     <main className="content">
@@ -20,17 +30,9 @@ export default function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardCl
         <button className="profile__button" type="button" onClick={onAddPlace}/>
       </section>
       <section className="photo-galery">
-        <ul className="elements">{
-          cards.map(
-            (data) => {
-              return (<Card
-                key={data._id}
-                card={data}
-                onCardClick={onCardClick}
-                onCardLike={onCardLike}
-                onCardDelete={onCardDelete}/>)
-            }
-          )}</ul>
+        <div className="elements">
+          {cardsElements}
+        </div>
       </section>
     </main>
   )
