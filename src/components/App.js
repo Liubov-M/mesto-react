@@ -1,4 +1,4 @@
-import Header from './Header.js'
+import { Route, Switch, useHistory } from 'react-router-dom';
 import Main from './Main.js'
 import Footer from './Footer.js'
 import PopupWithForm from './PopupWithForm.js'
@@ -9,15 +9,88 @@ import api from '../utils/api.js'
 import EditProfilePopup from './EditProfilePopup.js'
 import EditAvatarPopup from './EditAvatarPopup.js'
 import AddPlacePopup from './AddPlacePopup.js'
+import Login from './Login.js';
+import Register from './Register.js';
+import InfoTooltip from './InfoTooltip.js'
+import ProtectedRoute from './ProtectedRoute.js'
+import { register, login, checkToken } from '../utils/auth.js';
 
-function App() {
+export default function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false)
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false)
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false)
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null)
   const [currentUser, setCurrentUser] = useState({})
   const [cards, setCards] = useState([])
 
+  //авторизация
+  const [isAuth, setIsAuth] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState('');
+  const history = useHistory ()
+
+  const auth = (jwt) => {
+    return checkToken(jwt)
+    .then((res) => {
+      if (res) {
+        // const { email } = res;
+        setIsLoggedIn (true);
+        setUserData (res.email)
+      }
+    }
+    )
+  }
+
+  useEffect(() => {
+    const jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      auth(jwt);
+    }
+  }, [])
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      history.push('/');
+    }
+  }, [isLoggedIn, history])
+
+  const onLogin = ({ password, email }) => {
+    return login(password, email)
+      .then((res) => {
+        if (res.jwt) {
+          setIsLoggedIn(true);
+          setIsAuth(true);
+          localStorage.setItem('jwt', res.jwt);
+        }
+     })
+     .catch((err) => {
+      setIsAuth(false);
+      openRegistrationStatus();
+      if (err.status === 400) {
+        console.log('400 - не передано одно из полей')
+      } else if (err.status === 401) {
+        console.log('401 - пользователь с email не найден')
+      }
+    });
+  }
+  const onRegister = ({ password, email }) => {
+    return register(password, email)
+      .then((res) => {
+        if (!res || res.status === 400) throw new Error('Hекорректно заполнено одно из полей');
+        return res
+     })}
+
+  const handleLogout = () => {
+    localStorage.removeItem('jwt');
+    setIsLoggedIn(false);
+    setIsAuth(false);
+    history.push('/sign-in');
+  };
+  function openRegistrationStatus() {
+    setIsTooltipOpen(true);
+    window.addEventListener('click', handleCloseOnOverlay);
+  }
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(true)
   }
@@ -31,7 +104,13 @@ function App() {
     setIsEditProfilePopupOpen(false)
     setIsEditAvatarPopupOpen(false)
     setIsAddPlacePopupOpen(false)
+    setIsTooltipOpen(false)
     setSelectedCard(null)
+  }
+  function handleCloseOnOverlay(evt) {
+    if (evt.target.classList.contains('popup_opened')) {
+      closeAllPopups();
+    }
   }
   function handleCardClick(props) {
     setSelectedCard(props)
@@ -101,17 +180,30 @@ function App() {
   <CurrentUserContext.Provider value={currentUser}>
     <div className="App">
       <div className="page">
-        <Header/>
+        <Switch>
+          <Route
+            exact path="/">
+              <Main
+            isLoggedIn={isLoggedIn}
+            onEditProfile={handleEditProfileClick}
+            onEditAvatar={handleEditAvatarClick}
+            onAddPlace={handleAddPlaceClick}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+            cards={cards}
+            logout={handleLogout}
+            userData={userData} />
+      </Route>
 
-        <Main
-        onEditProfile={handleEditProfileClick}
-        onEditAvatar={handleEditAvatarClick}
-        onAddPlace={handleAddPlaceClick}
-        onCardClick={handleCardClick}
-        onCardLike={handleCardLike}
-        onCardDelete={handleCardDelete}
-        cards={cards}
-        />
+          <Route path="/sign-up">
+            <Register onRegister={onRegister} />
+          </Route>
+
+          <Route path="/sign-in">
+            <Login onLogin={onLogin} />
+          </Route>
+        </Switch>
 
         <Footer/>
 
@@ -141,10 +233,15 @@ function App() {
         card={selectedCard}
         onClose={closeAllPopups}
         />
+        <InfoTooltip
+          isOpen={isTooltipOpen}
+          onClose={closeAllPopups}
+          isRegSuccess={isAuth}
+          regSuccess="Вы успешно зарегестрировались!"
+          regFailed="Что-то пошло не так! Попробуйте еще раз."
+        />
       </div>
     </div>
   </CurrentUserContext.Provider>
   );
 }
-
-export default App;
